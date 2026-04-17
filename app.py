@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'ma_cle_secrete_astronomie'
+app.config['SECRET_KEY'] = 'cle_super_secrete'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/astronomie_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -50,6 +50,20 @@ class Actualite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.String(255), nullable=False)
     date_publication = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+# --- TABLES POUR LE FORUM ---
+class Sujet(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    titre = db.Column(db.String(200), nullable=False)
+    auteur = db.Column(db.String(150), nullable=False)
+    date_creation = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+class MessageForum(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    contenu = db.Column(db.Text, nullable=False)
+    auteur = db.Column(db.String(150), nullable=False)
+    sujet_id = db.Column(db.Integer, nullable=False)
+    date_creation = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -157,6 +171,38 @@ def post_news(msg):
     
     socketio.emit('new_news', {'message': msg, 'date': 'À l\'instant'})
     return f"News postée : {msg}"
+
+# --- ROUTES DU FORUM ---
+
+@app.route('/forum', methods=['GET', 'POST'])
+@login_required
+def forum():
+    if request.method == 'POST':
+        titre = request.form.get('titre')
+        if titre:
+            nouveau_sujet = Sujet(titre=titre, auteur=current_user.username)
+            db.session.add(nouveau_sujet)
+            db.session.commit()
+            return redirect(url_for('forum'))
+            
+    sujets = Sujet.query.order_by(Sujet.date_creation.desc()).all()
+    return render_template('forum.html', sujets=sujets)
+
+@app.route('/forum/sujet/<int:id>', methods=['GET', 'POST'])
+@login_required
+def sujet_detail(id):
+    sujet = Sujet.query.get_or_404(id)
+    
+    if request.method == 'POST':
+        contenu = request.form.get('contenu')
+        if contenu:
+            nouveau_message = MessageForum(contenu=contenu, auteur=current_user.username, sujet_id=sujet.id)
+            db.session.add(nouveau_message)
+            db.session.commit()
+            return redirect(url_for('sujet_detail', id=sujet.id))
+            
+    messages = MessageForum.query.filter_by(sujet_id=sujet.id).order_by(MessageForum.date_creation.asc()).all()
+    return render_template('sujet_detail.html', sujet=sujet, messages=messages)
 
 # --- ROUTE POUR AJOUTER DES DONNÉES DE TEST ---
 

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ sujet.titre }} - Forum</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="mb-4">
+            <a href="{{ url_for('forum') }}" class="btn btn-outline-secondary btn-sm mb-3">⬅ Retour au forum</a>
+            <h2>{{ sujet.titre }}</h2>
+            <p class="text-muted">Lancé par <strong>{{ sujet.auteur }}</strong></p>
+        </div>
+
+        <div class="d-flex flex-column gap-3 mb-4">
+            {% for msg in messages %}
+            <div class="card shadow-sm {% if msg.auteur == current_user.username %}border-primary{% endif %}">
+                <div class="card-header bg-white d-flex justify-content-between">
+                    <strong>{{ msg.auteur }}</strong>
+                    <small class="text-muted">{{ msg.date_creation.strftime('%d/%m/%Y %H:%M') }}</small>
+                </div>
+                <div class="card-body">
+                    <p class="card-text mb-0">{{ msg.contenu }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-light border text-center">Aucune réponse pour le moment.</div>
+            {% endfor %}
+        </div>
+
+        <div class="card p-3 shadow-sm bg-white">
+            <form method="POST" action="/forum/sujet/{{ sujet.id }}">
+                <div class="mb-3">
+                    <label class="form-label">Votre réponse :</label>
+                    <textarea name="contenu" class="form-control" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Envoyer le message</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
