@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ telescope.marque }} {{ telescope.modele }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="card shadow-lg p-5 text-center">
+            <h1 class="display-4">{{ telescope.marque }} {{ telescope.modele }}</h1>
+            <p class="text-muted mt-2">Catégorie : {{ telescope.categorie }} | Date de sortie : {{ telescope.date_sortie }}</p>
+            <hr class="my-4">
+            
+            <h3 class="mb-3">Résumé</h3>
+            <p class="lead">{{ telescope.resume }}</p>
+            
+            <div class="mt-4">
+                <span class="badge bg-warning text-dark fs-5">Note des utilisateurs : ⭐ {{ telescope.score }} / 5</span>
+            </div>
+            
+            <div class="mt-5">
+                <a href="{{ url_for('telescopes') }}" class="btn btn-secondary">Retour à la liste</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

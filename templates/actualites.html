@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Actualités Astro en Direct</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>🌠 Fil d'actualités en direct</h2>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Retour</a>
+        </div>
+
+        <div id="news-container" class="list-group shadow-sm">
+            {% for actu in actualites %}
+            <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ actu.message }}</h5>
+                    <small>{{ actu.date_publication.strftime('%H:%M') }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        var socket = io();
+
+        socket.on('new_news', function(data) {
+            var container = document.getElementById('news-container');
+            
+            var newDiv = document.createElement('div');
+            newDiv.className = "list-group-item list-group-item-info animate__animated animate__fadeInDown";
+            newDiv.innerHTML = `
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">${data.message}</h5>
+                    <small>${data.date}</small>
+                </div>
+            `;
+            
+            container.insertBefore(newDiv, container.firstChild);
+        });
+    </script>
+</body>
+</html>
